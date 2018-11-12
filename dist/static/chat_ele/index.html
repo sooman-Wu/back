@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <!-- import CSS -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/element-ui/2.4.7/theme-chalk/index.css">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+  <div id="app">
+    <div id="chat">
+      <el-col :span="6">
+        <div class="chat_left">
+          <el-collapse v-model="activeNames" @change="handleChange">
+            <el-collapse-item v-for="item in userList" :title="item.name" :name="item.index">
+              <li v-for="lis in item.list" class="list_item" @click="select(lis)">
+                <img :src="lis.img" alt="" class="avatar">
+                <p>{{lis.name}}</p>
+              </li>
+            </el-collapse-item>
+          </el-collapse>
+        </div>
+      </el-col>
+      <el-col :span="18">
+        <div class="chat_right">
+          <div class="chat_top">{{session.name}}</div>
+          <div class="chat_panel">
+            <div class="m-message" id="chatContainer" v-scroll="session.messages">
+              <ul>
+                <li v-for="item in session.messages">
+                  <p class="time"><span>{{item.date | time}}</span></p>
+                  <div class="main" :class="{ self: item.self }">
+                    <img class="avatar" width="30" height="30" :src="item | avatar" />
+                    <div class="text">{{item.text}}</div>
+                  </div>
+                </li>
+              </ul>
+            </div>
+          </div>
+          <div class="chat_area">
+            <el-input type="textarea" :rows="2" placeholder="请输入内容" v-model="text" @keyup.native="inputing">
+            </el-input>
+            <el-row class="send_box">
+              <el-button type="primary" @click="send">发送</el-button>
+            </el-row>
+          </div>
+        </div>
+      </el-col>
+    </div>
+  </div>
+</body>
+<!-- import Vue before Element -->
+<script src="https://unpkg.com/vue/dist/vue.js"></script>
+<!-- import JavaScript -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/element-ui/2.4.7/index.js"></script>
+<script>
+  var that;
+  new Vue({
+    el: '#app',
+    data() {
+      that = this;
+      return {
+        textarea: '',
+        activeNames: ['1'],
+        text: '',
+        sessionIndex: 0,
+        user: {
+          id: 1,
+          name: 'sooman',
+          img: 'images/mine.png'
+        },
+        sessionUser: {
+          id: 111,
+          name: "",
+          img: ""
+        },
+        // 用户列表
+        userList: [{
+            name: '我的好友',
+            list: [{
+                id: 2,
+                name: '用户user',
+                img: 'images/mine.png',
+                index: 0
+              },
+              {
+                id: 3,
+                name: '用户user1',
+                img: 'images/mine.png',
+                index: 1
+              },
+              {
+                id: 4,
+                name: '用户user2',
+                img: 'images/mine.png',
+                index: 2
+              },
+              {
+                id: 5,
+                name: '用户user3',
+                img: 'images/mine.png',
+                index: 3
+              },
+              {
+                id: 6,
+                name: '用户user4',
+                img: 'images/mine.png',
+                index: 4
+              },
+              {
+                id: 7,
+                name: '用户user5',
+                img: 'images/mine.png',
+                index: 5
+              }
+            ]
+          },
+          {
+            name: '我的家人',
+            list: [{
+                id: 8,
+                name: '用户user6',
+                img: 'images/mine.png',
+                index: 6
+              },
+              {
+                id: 9,
+                name: '用户user7',
+                img: 'images/aa.jpg',
+                index: 7
+              }
+            ]
+          },
+        ],
+        // 会话列表
+        sessionList: [{
+            userId: 2,
+            name: '用户user',
+            messages: [{
+                text: 'Hello。',
+                date: new Date()
+              },
+              {
+                text: '在吗',
+                date: new Date()
+              }
+            ]
+          },
+          {
+            userId: 3,
+            name: '用户user1',
+            messages: []
+          },
+          {
+            userId: 4,
+            name: '用户user2',
+            messages: [{
+              text: '在不，我是小美',
+              date: new Date()
+            }]
+          },
+          {
+            userId: 5,
+            name: '用户user3',
+            messages: []
+          },
+          {
+            userId: 6,
+            name: '用户user4',
+            messages: []
+          },
+          {
+            userId: 7,
+            name: '用户user5',
+            messages: []
+          },
+          {
+            userId: 8,
+            name: '用户user6',
+            messages: []
+          },
+          {
+            userId: 9,
+            name: '用户user7',
+            messages: [{
+              text: "我是美女",
+              date: new Date()
+            }]
+          },
+        ],
+      };
+    },
+    mounted() {
+      this.sessionUser.img = this.userList[0].list[0].img;
+    },
+    computed: {
+      session() {
+        return this.sessionList[this.sessionIndex];
+      }
+    },
+    methods: {
+      handleChange(val) {
+        console.log(val);
+      },
+      inputing(e) {
+        if (e.keyCode === 13 && this.text.length) {
+          this.session.messages.push({
+            text: this.text,
+            date: new Date(),
+            self: true
+          });
+          this.text = '';
+        }
+      },
+      send() {
+        this.session.messages.push({
+          text: this.text,
+          date: new Date(),
+          self: true
+        });
+        this.text = '';
+      },
+      select(value) {
+        this.sessionUser = value;
+        this.sessionIndex = value.index;
+      }
+    },
+    filters: {
+      // 筛选出用户头像
+      avatar(item) {
+        // 如果是自己发的消息显示登录用户的头像
+        let user = item.self ? that._data.user : that._data.sessionUser;
+        return user && user.img;
+      },
+      // 将日期过滤为 hour:minutes
+      time(date) {
+        if (typeof date === 'string') {
+          date = new Date(date);
+        }
+        return date.toLocaleTimeString();
+      }
+    },
+    directives: {
+      // 发送消息后滚动到底部
+      'scroll' () {
+        Vue.nextTick(() => {
+          var container = document.getElementById("chatContainer");
+          container.scrollTop = container.scrollHeight - container.clientHeight;
+        });
+      }
+    }
+  })
+</script>
+
+</html>
